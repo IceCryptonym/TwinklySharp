@@ -12,7 +12,7 @@ namespace TwinklySharp
         private static readonly HttpClient client = new HttpClient();
         private static readonly JsonSerializerOptions options = new JsonSerializerOptions() {
             Converters = {
-                new JsonStringEnumConverter()
+                new JsonStringEnumConverter(new LowerCaseNamingPolicy())
             },
             NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
@@ -61,6 +61,16 @@ namespace TwinklySharp
         public async Task<string> GetStaticDeviceName()
         {
             return (await Get<StaticDeviceNameModel>(baseUri + Urls.DEVICE_NAME)).StaticDeviceName;
+        }
+
+        public async Task<LedModeResponseModel> GetLedMode()
+        {
+            return await Get<LedModeResponseModel>(baseUri + Urls.LED_MODE);
+        }
+
+        public async Task<int> SetLedMode(LedModeModel model)
+        {
+            return (await Post<LedModeModel, StatusCodeModel>(baseUri + Urls.LED_MODE, model)).StatusCode;
         }
 
         public async Task<LedColorResponseModel> GetLedColor()

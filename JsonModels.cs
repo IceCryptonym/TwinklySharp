@@ -49,6 +49,17 @@ namespace TwinklySharp
         [property: JsonPropertyName("code")]int StatusCode
     );
 
+    public record LedModeModel(
+        [property: JsonPropertyName("mode")]LedMode Mode,
+        [property: JsonPropertyName("effect_id")]int? EffectId = null
+    );
+
+    public record LedModeResponseModel(
+        [property: JsonPropertyName("mode")]LedMode Mode,
+        [property: JsonPropertyName("shop_mode")]int ShopMode,
+        [property: JsonPropertyName("code")]int StatusCode
+    );
+
     public record LedColorRgbModel(
         [property: JsonPropertyName("red")]int Red,
         [property: JsonPropertyName("green")]int Green,
@@ -77,6 +88,17 @@ namespace TwinklySharp
         F,
         G,
         M
+    }
+
+    public enum LedMode
+    {
+        [JsonPropertyName("off")] Off,
+        [JsonPropertyName("color")] Color,
+        [JsonPropertyName("demo")] Demo,
+        [JsonPropertyName("effect")] Effect,
+        [JsonPropertyName("movie")] Movie,
+        [JsonPropertyName("playlist")] Playlist,
+        [JsonPropertyName("rt")] RealTime
     }
 
     public enum LedProfile

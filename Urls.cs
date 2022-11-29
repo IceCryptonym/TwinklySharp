@@ -11,5 +11,6 @@ namespace TwinklySharp
         public const string DEVICE_NAME = BASE + "device_name";
 
         public const string LED_COLOR = BASE + "led/color";
+        public const string LED_MODE = BASE + "led/mode";
     }
 }
