@@ -1,16 +1,56 @@
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Security.Cryptography;
 
 namespace TwinklySharp
 {
     public class Twinkly
     {
+        private static readonly HttpClient client = new HttpClient();
+
+        private readonly string baseUri;
         public IPAddress IP { get; init; }
         public string DeviceId { get; init; }
 
+        public string? AuthToken { get; protected set; }
+        public int? ExpiresIn { get; protected set; }
+
         public Twinkly(IPAddress ip, string deviceId)
         {
+            baseUri = "http://" + ip.ToString();
             IP = ip;
             DeviceId = deviceId;
+        }
+
+        public async Task<bool> Login()
+        {
+            string challenge = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+            LoginModel loginModel = new LoginModel(challenge);
+            LoginResponseModel loginRespModel = await Post<LoginModel, LoginResponseModel>(baseUri + Urls.LOGIN, loginModel);
+            if (loginRespModel.StatusCode != 1000)
+                return false;
+
+            client.DefaultRequestHeaders.Add("X-Auth-Token", loginRespModel.AuthToken);
+
+            VerifyModel verifyModel = new VerifyModel(loginRespModel.ChallengeResponse);
+            StatusCodeModel verifyRespModel = await Post<VerifyModel, StatusCodeModel>(baseUri + Urls.VERIFY, verifyModel);
+            if (verifyRespModel.StatusCode != 1000)
+                return false;
+
+            AuthToken = loginRespModel.AuthToken;
+            ExpiresIn = loginRespModel.ExpiresIn;
+
+            return true;
+        }
+
+        private async Task<TResponse> Post<TSend, TResponse>(string uri, TSend model)
+        {
+            JsonContent content = JsonContent.Create(model);
+            await content.LoadIntoBufferAsync();
+            HttpResponseMessage response = await client.PostAsync(uri, content);
+            return (await response.Content.ReadFromJsonAsync<TResponse>())!;
         }
     }
 }
