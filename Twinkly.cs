@@ -63,6 +63,21 @@ namespace TwinklySharp
             return (await Get<StaticDeviceNameModel>(baseUri + Urls.DEVICE_NAME)).StaticDeviceName;
         }
 
+        public async Task<LedColorResponseModel> GetLedColor()
+        {
+            return await Get<LedColorResponseModel>(baseUri + Urls.LED_COLOR);
+        }
+
+        public async Task<int> SetLedColorRgb(LedColorRgbModel model)
+        {
+            return (await Post<LedColorRgbModel, StatusCodeModel>(baseUri + Urls.LED_COLOR, model)).StatusCode;
+        }
+
+        public async Task<int> SetLedColorHsv(LedColorHsvModel model)
+        {
+            return (await Post<LedColorHsvModel, StatusCodeModel>(baseUri + Urls.LED_COLOR, model)).StatusCode;
+        }
+
         private async Task<TResponse> Post<TSend, TResponse>(string uri, TSend model)
         {
             JsonContent content = JsonContent.Create(model, null, options);

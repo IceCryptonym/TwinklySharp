@@ -49,6 +49,28 @@ namespace TwinklySharp
         [property: JsonPropertyName("code")]int StatusCode
     );
 
+    public record LedColorRgbModel(
+        [property: JsonPropertyName("red")]int Red,
+        [property: JsonPropertyName("green")]int Green,
+        [property: JsonPropertyName("blue")]int Blue
+    );
+
+    public record LedColorHsvModel(
+        [property: JsonPropertyName("hue")]int Hue,
+        [property: JsonPropertyName("saturation")]int Saturation,
+        [property: JsonPropertyName("value")]int Brightness
+    );
+
+    public record LedColorResponseModel(
+        [property: JsonPropertyName("hue")]int Hue,
+        [property: JsonPropertyName("saturation")]int Saturation,
+        [property: JsonPropertyName("value")]int Brightness,
+        [property: JsonPropertyName("red")]int Red,
+        [property: JsonPropertyName("green")]int Green,
+        [property: JsonPropertyName("blue")]int Blue,
+        [property: JsonPropertyName("code")]int StatusCode
+    );
+
     public enum FirmwareFamily
     {
         D,

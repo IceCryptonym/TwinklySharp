@@ -9,5 +9,7 @@ namespace TwinklySharp
 
         public const string GESTALT = BASE + "gestalt";
         public const string DEVICE_NAME = BASE + "device_name";
+
+        public const string LED_COLOR = BASE + "led/color";
     }
 }
