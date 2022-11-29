@@ -2,12 +2,20 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TwinklySharp
 {
     public class Twinkly
     {
         private static readonly HttpClient client = new HttpClient();
+        private static readonly JsonSerializerOptions options = new JsonSerializerOptions() {
+            Converters = {
+                new JsonStringEnumConverter()
+            },
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
 
         private readonly string baseUri;
         public IPAddress IP { get; init; }
@@ -45,12 +53,28 @@ namespace TwinklySharp
             return true;
         }
 
+        public async Task<DeviceDetailsModel> GetDeviceDetails()
+        {
+            return await Get<DeviceDetailsModel>(baseUri + Urls.GESTALT);
+        }
+
+        public async Task<string> GetStaticDeviceName()
+        {
+            return (await Get<StaticDeviceNameModel>(baseUri + Urls.DEVICE_NAME)).StaticDeviceName;
+        }
+
         private async Task<TResponse> Post<TSend, TResponse>(string uri, TSend model)
         {
-            JsonContent content = JsonContent.Create(model);
+            JsonContent content = JsonContent.Create(model, null, options);
             await content.LoadIntoBufferAsync();
             HttpResponseMessage response = await client.PostAsync(uri, content);
             return (await response.Content.ReadFromJsonAsync<TResponse>())!;
+        }
+
+        private async Task<TResponse> Get<TResponse>(string uri)
+        {
+            HttpResponseMessage response = await client.GetAsync(uri);
+            return (await response.Content.ReadFromJsonAsync<TResponse>(options))!;
         }
     }
 }
