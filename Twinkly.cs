@@ -58,9 +58,9 @@ namespace TwinklySharp
             return await Get<DeviceDetailsModel>(baseUri + Urls.GESTALT);
         }
 
-        public async Task<string> GetStaticDeviceName()
+        public async Task<string> GetDeviceName()
         {
-            return (await Get<StaticDeviceNameModel>(baseUri + Urls.DEVICE_NAME)).StaticDeviceName;
+            return (await Get<DeviceNameModel>(baseUri + Urls.DEVICE_NAME)).DeviceName;
         }
 
         public async Task<LedModeResponseModel> GetLedMode()

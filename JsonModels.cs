@@ -44,8 +44,8 @@ namespace TwinklySharp
         [property: JsonPropertyName("copyright")]           string Copyright
     );
 
-    internal record StaticDeviceNameModel(
-        [property: JsonPropertyName("name")]string StaticDeviceName,
+    internal record DeviceNameModel(
+        [property: JsonPropertyName("name")]string DeviceName,
         [property: JsonPropertyName("code")]int StatusCode
     );
 
