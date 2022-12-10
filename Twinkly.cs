@@ -1,9 +1,12 @@
+using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace TwinklySharp
 {
@@ -86,6 +89,53 @@ namespace TwinklySharp
         public async Task<int> SetLedColorHsv(LedColorHsvModel model)
         {
             return (await Post<LedColorHsvModel, StatusCodeModel>(baseUri + Urls.LED_COLOR, model)).StatusCode;
+        }
+
+        private async Task<int> CreateMovieEntry(MovieCreateModel model)
+        {
+            return (await Post<MovieCreateModel, StatusCodeModel>(baseUri + Urls.MOVIES_NEW, model)).StatusCode;
+        }
+
+        public async Task<int> UploadMovie(Movie movie, bool enable = false)
+        {
+            LedMode setToMode = LedMode.Movie;
+            if (!enable)
+            {
+                LedModeResponseModel currentLedMode = await GetLedMode();
+                setToMode = currentLedMode.Mode;
+            }
+
+            await SetLedMode(new LedModeModel(LedMode.Off));
+            
+            int createMovieStatusCode = await CreateMovieEntry(movie.Details);
+            if (createMovieStatusCode != 1000)
+                return createMovieStatusCode;
+
+            ByteArrayContent content = new ByteArrayContent(movie.GetBytes());
+            content.Headers.Add("Content-Type", "application/octet-stream");
+            HttpResponseMessage response = await client.PostAsync(baseUri + Urls.MOVIES_FULL, content);
+
+            int sendMovieStatusCode = (await response.Content.ReadFromJsonAsync<StatusCodeModel>(options))!.StatusCode;
+            if (sendMovieStatusCode != 1000)
+                return sendMovieStatusCode;
+
+            await SetLedMode(new LedModeModel(setToMode));
+
+            if (enable)
+                return await SetCurrentMovie(movie.Details.Guid);
+
+            return 1000;
+        }
+
+        public async Task<int> SetCurrentMovie(Guid guid)
+        {
+            return (await Post<MovieCurrentModel, StatusCodeModel>(baseUri + Urls.MOVIES_CURRENT, new MovieCurrentModel(guid))).StatusCode;
+        }
+
+        public async Task<int> SetMovieConfig(MovieCreateModel model, int ledCount)
+        {
+            MovieConfigModel config = new MovieConfigModel(model.FrameRate * 1000, ledCount, model.FrameCount);
+            return (await Post<MovieConfigModel, StatusCodeModel>(baseUri + Urls.MOVIE_CONFIG, config)).StatusCode;
         }
 
         private async Task<TResponse> Post<TSend, TResponse>(string uri, TSend model)

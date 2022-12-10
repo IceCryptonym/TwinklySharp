@@ -60,26 +60,60 @@ namespace TwinklySharp
         [property: JsonPropertyName("code")]int StatusCode
     );
 
-    public record LedColorRgbModel(
-        [property: JsonPropertyName("red")]int Red,
-        [property: JsonPropertyName("green")]int Green,
-        [property: JsonPropertyName("blue")]int Blue
+    public record struct LedColorRgbModel(
+        [property: JsonPropertyName("red")]byte Red,
+        [property: JsonPropertyName("green")]byte Green,
+        [property: JsonPropertyName("blue")]byte Blue,
+        [property: JsonPropertyName("white")]byte White = 0
     );
 
-    public record LedColorHsvModel(
+    public record struct LedColorHsvModel(
         [property: JsonPropertyName("hue")]int Hue,
-        [property: JsonPropertyName("saturation")]int Saturation,
-        [property: JsonPropertyName("value")]int Brightness
+        [property: JsonPropertyName("saturation")]byte Saturation,
+        [property: JsonPropertyName("value")]byte Brightness
     );
 
-    public record LedColorResponseModel(
+    public record struct LedColorResponseModel(
         [property: JsonPropertyName("hue")]int Hue,
-        [property: JsonPropertyName("saturation")]int Saturation,
-        [property: JsonPropertyName("value")]int Brightness,
-        [property: JsonPropertyName("red")]int Red,
-        [property: JsonPropertyName("green")]int Green,
-        [property: JsonPropertyName("blue")]int Blue,
+        [property: JsonPropertyName("saturation")]byte Saturation,
+        [property: JsonPropertyName("value")]byte Brightness,
+        [property: JsonPropertyName("red")]byte Red,
+        [property: JsonPropertyName("green")]byte Green,
+        [property: JsonPropertyName("blue")]byte Blue,
         [property: JsonPropertyName("code")]int StatusCode
+    );
+
+    public record MovieCreateModel(
+        [property: JsonPropertyName("name")]string Name,
+        [property: JsonPropertyName("unique_id")]Guid Guid,
+        [property: JsonPropertyName("descriptor_type")]MovieLedColorType ColorType,
+        [property: JsonPropertyName("leds_per_frame")]int LedsPerFrame,
+        [property: JsonPropertyName("fps")]int FrameRate
+    )
+    {
+        [JsonPropertyName("frames_number")]
+        public int FrameCount { get; internal set; }
+
+        public static MovieCreateModel Create(string name, int frameRate, DeviceDetailsModel deviceDetails)
+        {
+            return Create(name, frameRate, deviceDetails.Profile == LedProfile.RGB ? MovieLedColorType.RGB_RAW : MovieLedColorType.RGBW_RAW, deviceDetails.LedCount);
+        }
+
+        public static MovieCreateModel Create(string name, int frameRate, MovieLedColorType colorType, int ledCount)
+        {
+            Guid guid = Guid.NewGuid();
+            return new MovieCreateModel(name, guid, colorType, ledCount, frameRate);
+        }
+    }
+
+    internal record MovieCurrentModel(
+        [property: JsonPropertyName("unique_id")]Guid Guid
+    );
+
+    internal record MovieConfigModel(
+        [property: JsonPropertyName("frame_delay")]int FrameDelay,
+        [property: JsonPropertyName("leds_number")]int LedCount,
+        [property: JsonPropertyName("frames_number")]int FrameCount
     );
 
     public enum FirmwareFamily
@@ -105,5 +139,11 @@ namespace TwinklySharp
     {
         RGB,
         RGBW
+    }
+
+    public enum MovieLedColorType
+    {
+        RGB_RAW,
+        RGBW_RAW
     }
 }
